@@ -12,9 +12,9 @@ export default function Faucet() {
             {/* text */}
             <span className="flex items-center mx-1 xs:mx-3 xl:mx-0">
               <IoWaterSharp className="size-7 text-sky-500 -mt-2" />
-              <h1 className="font-roboto font-bold text-md xs:text-xl">Faucet Ethereum Water (SEPOLIA)</h1>
+              <h1 className="font-roboto font-bold text-md xs:text-xl lg:text-2xl xl:text-3xl">Faucet Ethereum Water (SEPOLIA)</h1>
             </span>
-            <p className="ml-3 xs:mx-5 xl:mx-2 font-semibold font-inter text-slate-500 mt-1"><span className="font-bold text-white">WTR TOKEN</span> dolor sit amet consectetur adipisicing elit. Laudantium voluptates dolorum consectetur cupiditate quaerat praesentium qui similique quod perspiciatis nostrum!</p>
+            <p className="ml-3 xs:mx-5 xl:mx-2 font-semibold font-inter text-slate-400 mt-1"><span className="font-bold text-white">WTR TOKEN</span> dolor sit amet consectetur adipisicing elit. Laudantium voluptates dolorum consectetur cupiditate quaerat praesentium qui similique quod perspiciatis nostrum!</p>
           </div>
 
           <div>
