@@ -1,20 +1,17 @@
-import { ConnectButton } from "thirdweb/react";
-import { createWallet } from "thirdweb/wallets";
-import { client } from "../client";
+// import { ConnectButton } from "thirdweb/react";
+// import { createWallet } from "thirdweb/wallets";
+// import { client } from "../client";
 
-const wallets = [createWallet('io.metamask')];
+// const wallets = [createWallet('io.metamask')];
 
-export default function Wallet() {
-  return (
-    <>
-      <div className="relative">
-        <div className="absolute md:static -right-[68px] md:right-0 -top-[25px] md:top-0 scale-[0.60] md:scale-none origin-left">
-            <ConnectButton
-              client={client}
-              wallets={wallets}
-            />
-        </div>
-      </div>
-    </>
-  )
-}
+// export default function Wallet() {
+//   return (
+//     <>
+//     <div className="flex justify-center items-center">
+//       <button className="bg-blue-400 text-white font-medium font-inter w-full py-2 my-3 rounded-lg">
+//         Connect Wallet
+//       </button>
+//     </div>
+//     </>
+//   )
+// }

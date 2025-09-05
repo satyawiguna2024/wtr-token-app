@@ -5,7 +5,10 @@
   /*todo: font-family */
   --font-roboto: "Roboto", sans-serif;
   --font-inter: "Inter", sans-serif;
-  
+
+  /*todo: colors  */
+  --color-primary: rgb(40,44,50);
+
   /*todo: breakpoints */
   --breakpoint-xs: 425px;
 }
