@@ -1,19 +1,29 @@
 import { Routes, Route } from "react-router";
-import {Home, Faucet} from "./pages/index";
+import Faucet from "./pages/faucet/Faucet"
+import Footer from "./components/Footer";
+import NotFound from "./components/NotFound";
+import MainLayout from "./MainLayout";
 
 export default function App() {
   return (
     <>
-      <div className="flex flex-col min-h-screen">
-        <h1 className="text-white">Navbar</h1>
-        <div className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/faucet" element={<Faucet />} />
-          </Routes>
-        </div>
-        <h1 className="text-white">Footer</h1>
-      </div>
+        <Routes>
+          <Route path="/" element={
+            <MainLayout>
+              <Faucet />
+            </MainLayout>
+          } />
+
+          {/* kalo misalnya ada route lain sama */}
+          {/* <Route path="/" element={
+            <MainLayout>
+              <Contact />
+            </MainLayout>
+          } /> */}
+
+          {/* not found pages */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
     </>
   );
 }

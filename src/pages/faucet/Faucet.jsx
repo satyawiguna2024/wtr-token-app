@@ -6,7 +6,7 @@ import { IoWaterSharp } from "react-icons/io5";
 import { IoCube } from "react-icons/io5";
 import { IoIosFlash } from "react-icons/io";
 import { MdOutlineWaterfallChart } from "react-icons/md";
-import { Eth } from "../../assets/svg";
+import { Eth } from "../../assets";
 
 export default function Faucet() {
 
