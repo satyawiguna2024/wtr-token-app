@@ -1,15 +1,10 @@
 import Stepper from "../../components/VertikalStepper";
 import { cardList } from "../../hooks/CardList";
+import { Link } from "react-router";
 
 //?? Assets
-import { IoIosSend } from "react-icons/io";
-import { IoWaterSharp } from "react-icons/io5";
-import { IoCube } from "react-icons/io5";
-import { IoIosFlash } from "react-icons/io";
-import { MdOutlineWaterfallChart } from "react-icons/md";
-import { MdKeyboardArrowRight } from "react-icons/md";
+import {IoIosSend, IoWaterSharp, IoCube, IoIosFlash, MdOutlineWaterfallChart, MdKeyboardArrowRight} from "../../assets/icons/index";
 import { Eth } from "../../assets";
-import { Link } from "react-router";
 
 export default function Faucet() {
   return (
@@ -119,7 +114,7 @@ export default function Faucet() {
         <div className="m-3 space-y-3">
           {cardList.map((i, index) => (
             <div key={index} className="border border-slate-800 rounded-lg p-5">
-              <h3 className="font-roboto text-md font-semibold text-white mb-3 cursor-pointer hover:underline underline-offset-4">
+              <h3 className="font-roboto text-md font-semibold text-white mb-3">
                 {i.title}
               </h3>
               <p className="font-inter text-sm font-light text-gray-400 opacity-80">
