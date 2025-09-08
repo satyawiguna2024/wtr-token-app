@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router";
-import Faucet from "./pages/faucet/Faucet"
-import Footer from "./components/Footer";
+import Faucet from "./pages/faucet/Faucet";
 import NotFound from "./components/NotFound";
 import MainLayout from "./MainLayout";
 

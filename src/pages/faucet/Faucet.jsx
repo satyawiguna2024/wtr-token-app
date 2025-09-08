@@ -1,12 +1,85 @@
-import Stepper from "../../components/VertikalStepper";
-import { cardList } from "../../hooks/CardList";
+import {
+  useActiveAccount,
+  useConnectedWallets,
+  useDisconnect,
+  useReadContract,
+  useSendTransaction,
+} from "thirdweb/react";
 import { Link } from "react-router";
+import { CONTRACT } from "../../client";
+import { cardList } from "../../hooks/CardList";
+import Stepper from "../../components/VertikalStepper";
+import ConnectWallet from "../../components/ConnectWallet";
+import { prepareContractCall } from "thirdweb";
+import { addTokenToWallet } from "../../hooks/addTokenToWallet";
 
 //?? Assets
-import {IoIosSend, IoWaterSharp, IoCube, IoIosFlash, MdOutlineWaterfallChart, MdKeyboardArrowRight} from "../../assets/icons/index";
+import {
+  IoIosSend,
+  IoWaterSharp,
+  IoCube,
+  IoIosFlash,
+  MdOutlineWaterfallChart,
+  MdKeyboardArrowRight,
+  AiOutlineLoading,
+} from "../../assets/icons/index";
 import { Eth } from "../../assets";
 
 export default function Faucet() {
+  const { mutate: sendTransaction, isPending } = useSendTransaction();
+  const account = useActiveAccount();
+  const connectedWallet = useConnectedWallets();
+  const { disconnect } = useDisconnect();
+
+  const { data: lastClaim } = useReadContract({
+    contract: CONTRACT,
+    method: "lastClaim",
+    params: account ? [account.address] : undefined,
+  });
+
+  // Cooldown 1 jam = 3600 detik
+  const cooldown = 3600;
+
+  // Hitung apakah masih cooldown
+  let canClaim = true;
+  let message = "";
+
+  if (lastClaim) {
+    const lastClaimTimestamp = Number(lastClaim); // dari smart contract
+    const now = Math.floor(Date.now() / 1000); // dalam detik
+    const diff = now - lastClaimTimestamp;
+
+    if (diff < cooldown) {
+      canClaim = false;
+      const remaining = cooldown - diff;
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+      message = `⏳ Anda sudah claim. Coba lagi dalam ${minutes} menit ${seconds} detik.`;
+    }
+  }
+
+  const handleTx = () => {
+    const toAddress = account?.address;
+
+    const tx = prepareContractCall({
+      contract: CONTRACT,
+      method: "claim",
+      params: [toAddress],
+    });
+
+    sendTransaction(tx, {
+      onSuccess: (res) => {
+        console.log("✅ Transaction confirmed:", res);
+        addTokenToWallet();
+        alert("✅ Transaction confirmed");
+        window.location.reload();
+      },
+      onError: (errors) => {
+        console.error("❌ Transaction failed:", errors);
+      },
+    });
+  };
+
   return (
     <>
       {/* Hero Section */}
@@ -56,6 +129,32 @@ export default function Faucet() {
                   support smart contract testing and DApps. 🚀
                 </p>
               </div>
+
+              {/* wallet connection */}
+              {account ? (
+                <div>
+                  <h1>Account: {account.address}</h1>
+                  {message && (
+                    <p className="text-yellow-400 font-medium">{message}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (connectedWallet.length > 0) {
+                        disconnect(connectedWallet[0]);
+                      }
+                    }}
+                    className="font-inter text-md underline text-gray-400 opacity-80 mt-1 cursor-pointer"
+                  >
+                    Disconnect Wallet
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <ConnectWallet />
+                </div>
+              )}
+
               <hr className="my-5 text-white opacity-20" />
               <form>
                 <div className="grid grid-cols-2 gap-4 mb-12">
@@ -75,38 +174,67 @@ export default function Faucet() {
                   >
                     Wallet Address
                   </label>
-                  <input
-                    id="walletAddress"
-                    type="text"
-                    maxLength={42}
-                    placeholder="0xf2D15ee...46a0"
-                    className="w-full px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
 
+                  {account ? (
+                    <input
+                      id="walletAddress"
+                      type="text"
+                      readOnly
+                      placeholder="0xf2D15ee...46a0 (Connect Wallet first!)"
+                      value={account.address}
+                      className="w-full px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                    />
+                  ) : (
+                    <input
+                      id="walletAddress"
+                      type="text"
+                      readOnly
+                      placeholder="0xf2D15ee...46a0 (Connect Wallet first!)"
+                      value={""}
+                      className="w-full px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                    />
+                  )}
+                </div>
+              </form>
+
+              {account?.address && canClaim && (
                 <button
-                  type="submit"
-                  className="px-8 py-2 bg-blue-400 hover:bg-blue-500 cursor-pointer text-white font-medium font-roboto mt-10 rounded-lg flex items-center gap-x-1"
+                  type="button"
+                  disabled={isPending}
+                  onClick={handleTx}
+                  className={`px-8 py-2 text-white font-medium font-roboto mt-10 rounded-lg flex items-center gap-x-2 ${
+                    isPending
+                      ? "bg-gray-500 cursor-not-allowed"
+                      : "bg-blue-400 hover:bg-blue-500 cursor-pointer"
+                  }`}
                 >
-                  Send{" "}
+                  {isPending ? "Sending" : "Send"}{" "}
                   <i>
-                    <IoIosSend size={25} />
+                    {isPending ? (
+                      <AiOutlineLoading size={25} className="animate-spin" />
+                    ) : (
+                      <IoIosSend size={25} />
+                    )}
                   </i>
                 </button>
-              </form>
+              )}
             </Stepper>
           </div>
 
           {/* Stepper lainnya */}
           <div className="px-5 pt-8">
             <Stepper icon={<IoIosFlash />}>
-              <h2 className="text-xl font-roboto font-semibold text-slate-500">Share a tweet to getting 1x bonus! </h2>
+              <h2 className="text-xl font-roboto font-semibold text-slate-500">
+                Share a tweet to getting 1x bonus!{" "}
+              </h2>
             </Stepper>
           </div>
 
           <div className="px-5 pt-8">
             <Stepper icon={<MdOutlineWaterfallChart />} line={true} isLast>
-              <h2 className="text-xl font-roboto font-semibold text-slate-500">Receive drip</h2>
+              <h2 className="text-xl font-roboto font-semibold text-slate-500">
+                Receive drip
+              </h2>
             </Stepper>
           </div>
         </div>
@@ -121,7 +249,12 @@ export default function Faucet() {
                 {i.description}
               </p>
 
-              <Link to={i.url} className="flex items-center mt-5 font-inter text-sm text-blue-400 hover:underline">Explore this guide  <MdKeyboardArrowRight size={25} /></Link>
+              <Link
+                to={i.url}
+                className="flex items-center mt-5 font-inter text-sm text-blue-400 hover:underline"
+              >
+                Explore this guide <MdKeyboardArrowRight size={25} />
+              </Link>
             </div>
           ))}
         </div>
