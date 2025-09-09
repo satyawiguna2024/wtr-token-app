@@ -1,9 +1,9 @@
 import {
+  TransactionButton,
   useActiveAccount,
   useConnectedWallets,
   useDisconnect,
   useReadContract,
-  useSendTransaction,
 } from "thirdweb/react";
 import { Link } from "react-router";
 import { CONTRACT } from "../../client";
@@ -21,12 +21,10 @@ import {
   IoIosFlash,
   MdOutlineWaterfallChart,
   MdKeyboardArrowRight,
-  AiOutlineLoading,
 } from "../../assets/icons/index";
 import { Eth } from "../../assets";
 
 export default function Faucet() {
-  const { mutate: sendTransaction, isPending } = useSendTransaction();
   const account = useActiveAccount();
   const connectedWallet = useConnectedWallets();
   const { disconnect } = useDisconnect();
@@ -37,10 +35,8 @@ export default function Faucet() {
     params: account ? [account.address] : undefined,
   });
 
-  // Cooldown 1 jam = 3600 detik
-  const cooldown = 3600;
+  const cooldown = 43200;
 
-  // Hitung apakah masih cooldown
   let canClaim = true;
   let message = "";
 
@@ -54,31 +50,9 @@ export default function Faucet() {
       const remaining = cooldown - diff;
       const minutes = Math.floor(remaining / 60);
       const seconds = remaining % 60;
-      message = `⏳ Anda sudah claim. Coba lagi dalam ${minutes} menit ${seconds} detik.`;
+      message = `⏳ You have already claimed. Please try again in ${minutes} minute ${seconds} second.`;
     }
   }
-
-  const handleTx = () => {
-    const toAddress = account?.address;
-
-    const tx = prepareContractCall({
-      contract: CONTRACT,
-      method: "claim",
-      params: [toAddress],
-    });
-
-    sendTransaction(tx, {
-      onSuccess: (res) => {
-        console.log("✅ Transaction confirmed:", res);
-        addTokenToWallet();
-        alert("✅ Transaction confirmed");
-        window.location.reload();
-      },
-      onError: (errors) => {
-        console.error("❌ Transaction failed:", errors);
-      },
-    });
-  };
 
   return (
     <>
@@ -198,25 +172,40 @@ export default function Faucet() {
               </form>
 
               {account?.address && canClaim && (
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={handleTx}
-                  className={`px-8 py-2 text-white font-medium font-roboto mt-10 rounded-lg flex items-center gap-x-2 ${
-                    isPending
-                      ? "bg-gray-500 cursor-not-allowed"
-                      : "bg-blue-400 hover:bg-blue-500 cursor-pointer"
-                  }`}
+                <TransactionButton
+                  transaction={() => {
+                    const toAddress = account?.address;
+
+                    const tx = prepareContractCall({
+                      contract: CONTRACT,
+                      method: "claim",
+                      params: [toAddress],
+                    });
+
+                    return tx;
+                  }}
+                  onTransactionSent={(res) => {
+                    console.log("Transaction sending ", res.transactionHash);
+                    addTokenToWallet();
+                  }}
+                  onTransactionConfirmed={(res) => {
+                    console.log(
+                      "✔️ Transaction successfully!",
+                      res.transactionHash
+                    );
+                    window.location.reload();
+                  }}
+                  onError={(err) => {
+                    console.log("🆇 Get promblen on transactions", err);
+                  }}
+                  style={{
+                    marginTop: "20px",
+                    backgroundColor: "rgba(69,208,239, 0.8)",
+                    color: "white",
+                  }}
                 >
-                  {isPending ? "Sending" : "Send"}{" "}
-                  <i>
-                    {isPending ? (
-                      <AiOutlineLoading size={25} className="animate-spin" />
-                    ) : (
-                      <IoIosSend size={25} />
-                    )}
-                  </i>
-                </button>
+                  Send
+                </TransactionButton>
               )}
             </Stepper>
           </div>
